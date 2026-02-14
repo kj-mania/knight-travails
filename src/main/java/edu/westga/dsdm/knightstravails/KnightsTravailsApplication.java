@@ -18,7 +18,7 @@ public class KnightsTravailsApplication extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(KnightsTravailsApplication.class.getResource("view/kinights-travails-gui.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
-        stage.setTitle("Knight's Travails by Your Name");
+        stage.setTitle("CS3151 Project by Kellen Andrews");
         stage.setScene(scene);
         stage.show();
     }

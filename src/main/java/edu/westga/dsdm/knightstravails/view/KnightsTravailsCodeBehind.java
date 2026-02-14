@@ -104,11 +104,36 @@ public class KnightsTravailsCodeBehind {
                 new BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
     }
 
+    // State 1: won = false, lost = false
+    //State 2: won = true, lost = true
+    //State 3: won = true, lost = false
+    //State 4: won = false, lost = true
+
     private void setupBindings() {
         this.knightPositionProperty.bind(this.viewModel.getKnightPositionProperty());
         this.targetPositionProperty.bind(this.viewModel.getTargetPositionProperty());
         this.numberMovesLabel.textProperty().bindBidirectional(this.viewModel.numberMovesProperty(),
                 new NumberStringConverter());
+
+        this.headerLabel.visibleProperty().bind(
+                viewModel.wonProperty().and(viewModel.lostProperty())
+                        .or(viewModel.wonProperty().not().and(viewModel.lostProperty().not()))
+        );
+        this.youWonLabel.visibleProperty().bind(
+                viewModel.wonProperty().and(viewModel.lostProperty().not())
+        );
+        this.youLostLabel.visibleProperty().bind(
+                viewModel.lostProperty().and(viewModel.wonProperty().not())
+        );
+        this.undoButton.disableProperty().bind(
+                viewModel.wonProperty().or(viewModel.lostProperty())
+        );
+        this.showSolutionButton.disableProperty().bind(
+                viewModel.wonProperty().and(viewModel.lostProperty().not())
+        );
+        this.chessBoardPane.disableProperty().bind(
+                viewModel.wonProperty().or(viewModel.lostProperty())
+        );
     }
 
     private void setupChessBoard() {

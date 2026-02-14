@@ -1,8 +1,10 @@
 package edu.westga.dsdm.knightstravails.viewmodel;
 
+import java.awt.*;
 import java.util.*;
 
 import edu.westga.dsdm.knightstravails.model.Position;
+import edu.westga.dsdm.knightstravails.solver.Solver;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.BooleanProperty;
@@ -22,11 +24,13 @@ public class KnightsTravailsViewModel {
 
     private final SimpleObjectProperty<Position> knightPositionProperty;
     private final SimpleObjectProperty<Position> targetPositionProperty;
+    private final Solver solver;
     private Position startPosition;
     private final BooleanProperty wonProperty;
     private final BooleanProperty lostProperty;
     private final SimpleIntegerProperty numberMovesProperty;
     private Deque<Position> moveHistory;
+    private LinkedList<Position> solutionPath;
 
     /**
      * Instantiates a new puzzle viewmodel for the logic of the knight's travails
@@ -43,6 +47,7 @@ public class KnightsTravailsViewModel {
         this.startPosition = null;
         this.numberMovesProperty = new SimpleIntegerProperty();
         this.moveHistory = new ArrayDeque<>();
+        this.solver = new Solver();
     }
 
     /**
@@ -116,8 +121,22 @@ public class KnightsTravailsViewModel {
             this.knightPositionProperty.setValue(position);
             this.numberMovesProperty.setValue(this.numberMovesProperty.getValue() + 1);
             this.moveHistory.push(this.knightPositionProperty.getValue());
+
+            if(this.checkCompleted()){
+                if (this.numberMovesProperty.getValue() == (this.solutionPath.size()-1)) {
+                    wonProperty.setValue(true);
+                } else {
+                    lostProperty.setValue(true);
+                }
+            }
         }
     }
+
+    private boolean checkCompleted() {
+        return this.knightPositionProperty.getValue().row() == this.targetPositionProperty.getValue().row() &&
+                this.knightPositionProperty.getValue().col() == this.targetPositionProperty.getValue().col();
+    }
+
 
     private boolean isValidMove(Position currentPosition, Position newPosition) {
         int rowDelta = newPosition.row() - currentPosition.row();
@@ -146,7 +165,6 @@ public class KnightsTravailsViewModel {
      * @post wonProperty.getValue == true && lostProperty.getValue() == true
      */
     public void showSolution() {
-        LinkedList<Position> solutionPath = new LinkedList<Position>();
         this.wonProperty.setValue(true);
         this.lostProperty.setValue(true);
         this.tracePath(solutionPath.iterator(), solutionPath.size() - 1);
@@ -161,6 +179,7 @@ public class KnightsTravailsViewModel {
     public void initializeNewPuzzle() {
         Random rand = new Random();
         this.startPosition = new Position(rand.nextInt(Position.MAX_ROWS), rand.nextInt(Position.MAX_COLS));
+        this.moveHistory.clear();
         this.knightPositionProperty.setValue(this.startPosition);
         this.moveHistory.push(this.startPosition);
         Position targetPosition = this.startPosition;
@@ -171,6 +190,7 @@ public class KnightsTravailsViewModel {
         this.wonProperty.setValue(false);
         this.lostProperty.setValue(false);
         this.numberMovesProperty.setValue(0);
+        this.solutionPath = solver.getSolutionPath(this.startPosition, this.targetPositionProperty.getValue());
     }
 
     /**
